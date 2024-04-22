@@ -27,6 +27,12 @@ class Homebrew::CLI::Args
   def direct?; end
 
   sig { returns(T::Boolean) }
+  def direct_build?; end
+
+  sig { returns(T::Boolean) }
+  def direct_test?; end
+
+  sig { returns(T::Boolean) }
   def dot?; end
 
   sig { returns(T::Boolean) }
@@ -62,6 +68,9 @@ class Homebrew::CLI::Args
   sig { returns(T::Boolean) }
   def installed?; end
 
+  sig { returns(T.nilable(String)) }
+  def level; end
+
   sig { returns(T::Boolean) }
   def missing?; end
 
@@ -70,6 +79,9 @@ class Homebrew::CLI::Args
 
   sig { returns(T.nilable(String)) }
   def os; end
+
+  sig { returns(T.nilable(T::Array[String])) }
+  def skip; end
 
   sig { returns(T::Boolean) }
   def skip_recommended?; end
