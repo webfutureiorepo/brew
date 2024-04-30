@@ -3,6 +3,7 @@
 
 require_relative "../../../global"
 require "env_config"
+require "sorbet/tapioca/rbi_formatter"
 
 module Tapioca
   module Compilers

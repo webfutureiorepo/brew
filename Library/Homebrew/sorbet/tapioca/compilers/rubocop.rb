@@ -4,6 +4,7 @@
 require "method_source"
 require "rubocop"
 require_relative "../../../rubocops"
+require_relative "../rbi_formatter"
 
 module Tapioca
   module Compilers
