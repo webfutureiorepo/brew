@@ -274,8 +274,8 @@ module GitHub
         args += ["--dump-header", T.must(headers_tmpfile.path)]
 
         require "utils/curl"
-        output, errors, status = Utils::Curl.curl_output("--location", url.to_s, *args, secrets: [token])
-        output, _, http_code = output.rpartition("\n")
+        result = Utils::Curl.curl_output("--location", url.to_s, *args, secrets: [token])
+        output, _, http_code = result.stdout.rpartition("\n")
         output, _, http_code = output.rpartition("\n") if http_code == "000"
         headers = headers_tmpfile.read
       ensure
@@ -288,7 +288,9 @@ module GitHub
       end
 
       begin
-        raise_error(output, errors, http_code, headers, scopes) if !http_code.start_with?("2") || !status.success?
+        if !http_code.start_with?("2") || !result.status.success?
+          raise_error(output, result.stderr, http_code, headers, scopes)
+        end
 
         return if http_code == "204" # No Content
 
@@ -327,9 +329,7 @@ module GitHub
       result = open_rest("#{API_URL}/graphql", scopes:, data:, request_method: "POST")
 
       if raise_errors
-        if result["errors"].present?
-          raise Error, result["errors"].map { |e| "#{e["type"]}: #{e["message"]}" }.join("\n")
-        end
+        raise Error, result["errors"].map { |e| e["message"] }.join("\n") if result["errors"].present?
 
         result["data"]
       else

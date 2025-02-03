@@ -480,9 +480,7 @@ module GitHub
     end
 
     # Only raise errors if we didn't get any sponsorships.
-    if sponsorships.blank? && errors.present?
-      raise API::Error, errors.map { |e| "#{e["type"]}: #{e["message"]}" }.join("\n")
-    end
+    raise API::Error, errors.map { |e| e["message"] }.join("\n") if sponsorships.blank? && errors.present?
 
     sponsorships.map do |sponsorship|
       sponsor = sponsorship["sponsorEntity"]
@@ -828,15 +826,15 @@ module GitHub
     return if Homebrew::EnvConfig.no_github_api?
 
     require "utils/curl"
-    output, _, status = Utils::Curl.curl_output(
+    result = Utils::Curl.curl_output(
       "--silent", "--head", "--location",
       "--header", "Accept: application/vnd.github.sha",
       url_to("repos", user, repo, "commits", ref).to_s
     )
 
-    return unless status.success?
+    return unless result.status.success?
 
-    commit = output[/^ETag: "(\h+)"/, 1]
+    commit = result.stdout[/^ETag: "(\h+)"/, 1]
     return if commit.blank?
 
     version.update_commit(commit)
@@ -847,14 +845,14 @@ module GitHub
     return false if Homebrew::EnvConfig.no_github_api?
 
     require "utils/curl"
-    output, _, status = Utils::Curl.curl_output(
+    result = Utils::Curl.curl_output(
       "--silent", "--head", "--location",
       "--header", "Accept: application/vnd.github.sha",
       url_to("repos", user, repo, "commits", commit).to_s
     )
 
-    return true unless status.success?
-    return true if output.blank?
+    return true unless result.status.success?
+    return true if (output = result.stdout).blank?
 
     output[/^Status: (200)/, 1] != "200"
   end

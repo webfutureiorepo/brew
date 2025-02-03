@@ -169,7 +169,7 @@ class GitHubPackages
     # Going forward, this should probably be pinned to tags.
     # We currently use features newer than the last one (v1.0.2).
     url = "https://raw.githubusercontent.com/opencontainers/image-spec/170393e57ed656f7f81c3070bfa8c3346eaa0a5a/schema/#{basename}.json"
-    out, = Utils::Curl.curl_output(url)
+    out = Utils::Curl.curl_output(url).stdout
     json = JSON.parse(out)
 
     @schema_json ||= {}
@@ -350,7 +350,7 @@ class GitHubPackages
       tar_gz_sha256 = write_tar_gz(local_file, blobs)
 
       tab = tag_hash["tab"]
-      architecture = TAB_ARCH_TO_PLATFORM_ARCHITECTURE[tab["arch"].presence || bottle_tag.arch.to_s]
+      architecture = TAB_ARCH_TO_PLATFORM_ARCHITECTURE[tab["arch"].presence || bottle_tag.standardized_arch.to_s]
       raise TypeError, "unknown tab['arch']: #{tab["arch"]}" if architecture.blank?
 
       os = if tab["built_on"].present? && tab["built_on"]["os"].present?
